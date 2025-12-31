@@ -2,88 +2,127 @@
 <html>
 <head>
   <title>IdeaHub</title>
+
   <style>
     body {
-      font-family: Arial;
-      background: #f4f6f8;
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background-image: url("data:image/jpeg;base64,{{BASE64_IMAGE}}");
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+
+    .overlay {
+      min-height: 100vh;
+      background: linear-gradient(
+        rgba(0,0,0,0.65),
+        rgba(0,0,0,0.65)
+      );
+      display: flex;
+      justify-content: center;
+      align-items: center;
       padding: 40px;
     }
-    h1 {
-      text-align: center;
-    }
-    .box {
-      background: white;
-      padding: 20px;
-      max-width: 500px;
-      margin: auto;
-      border-radius: 5px;
-    }
-    input, textarea, button {
+
+    .card {
       width: 100%;
-      margin-top: 10px;
-      padding: 10px;
-    }
-    button {
-      background: #007bff;
+      max-width: 500px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 30px;
       color: white;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      transform: perspective(800px) rotateX(3deg);
+    }
+
+    h1 {
+      margin-top: 0;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: none;
+      outline: none;
+    }
+
+    button {
+      padding: 10px 18px;
+      border-radius: 6px;
       border: none;
       cursor: pointer;
+      font-weight: bold;
     }
-    .idea {
-      background: #eee;
-      padding: 10px;
-      margin-top: 10px;
+
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    li {
+      background: rgba(255,255,255,0.2);
+      margin-bottom: 8px;
+      padding: 8px;
+      border-radius: 6px;
     }
   </style>
 </head>
+
 <body>
 
-  <h1>💡 IdeaHub</h1>
+<div class="overlay">
 
-  <div class="box">
-    <input id="title" placeholder="Idea Title">
+  <div class="card">
+    <h1>💡 IdeaHub</h1>
+    <h3>Welcome to <b>Sai Kolluri’s First DevOps Project 🚀</b></h3>
+    <p>
+      A 3D-styled containerized web app built using
+      <b>Docker, Jenkins & AWS EC2</b>
+    </p>
+
+    <input type="text" id="title" placeholder="Idea Title">
     <textarea id="description" placeholder="Describe your idea"></textarea>
+
     <button onclick="postIdea()">Post Idea</button>
 
     <h3>All Ideas</h3>
-    <div id="ideas"></div>
+    <button onclick="loadIdeas()">Load Ideas</button>
+
+    <ul id="ideasList"></ul>
   </div>
 
+</div>
+
 <script>
-  async function postIdea() {
-    const title = document.getElementById("title").value;
-    const description = document.getElementById("description").value;
+function postIdea() {
+  fetch("/ideas", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      title: document.getElementById("title").value,
+      description: document.getElementById("description").value
+    })
+  })
+  .then(() => loadIdeas());
+}
 
-    await fetch("http://localhost:3000/ideas", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, description })
+function loadIdeas() {
+  fetch("/ideas")
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById("ideasList");
+      list.innerHTML = "";
+      data.forEach(i => {
+        const li = document.createElement("li");
+        li.innerHTML = `<b>${i.title}</b> : ${i.description}`;
+        list.appendChild(li);
+      });
     });
-
-    document.getElementById("title").value = "";
-    document.getElementById("description").value = "";
-
-    loadIdeas();
-  }
-
-  async function loadIdeas() {
-    const res = await fetch("http://localhost:3000/ideas");
-    const data = await res.json();
-
-    const ideasDiv = document.getElementById("ideas");
-    ideasDiv.innerHTML = "";
-
-    data.forEach(i => {
-      ideasDiv.innerHTML += `
-        <div class="idea">
-          <strong>${i.title}</strong><br>
-          ${i.description}
-        </div>
-      `;
-    });
-  }
-
-  loadIdeas();
+}
 </script>
 
 </body>
