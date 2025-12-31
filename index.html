@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>IdeaHub</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f4f6f8;
+      padding: 40px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .box {
+      background: white;
+      padding: 20px;
+      max-width: 500px;
+      margin: auto;
+      border-radius: 5px;
+    }
+    input, textarea, button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .idea {
+      background: #eee;
+      padding: 10px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>💡 IdeaHub</h1>
+
+  <div class="box">
+    <input id="title" placeholder="Idea Title">
+    <textarea id="description" placeholder="Describe your idea"></textarea>
+    <button onclick="postIdea()">Post Idea</button>
+
+    <h3>All Ideas</h3>
+    <div id="ideas"></div>
+  </div>
+
+<script>
+  async function postIdea() {
+    const title = document.getElementById("title").value;
+    const description = document.getElementById("description").value;
+
+    await fetch("http://localhost:3000/ideas", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, description })
+    });
+
+    document.getElementById("title").value = "";
+    document.getElementById("description").value = "";
+
+    loadIdeas();
+  }
+
+  async function loadIdeas() {
+    const res = await fetch("http://localhost:3000/ideas");
+    const data = await res.json();
+
+    const ideasDiv = document.getElementById("ideas");
+    ideasDiv.innerHTML = "";
+
+    data.forEach(i => {
+      ideasDiv.innerHTML += `
+        <div class="idea">
+          <strong>${i.title}</strong><br>
+          ${i.description}
+        </div>
+      `;
+    });
+  }
+
+  loadIdeas();
+</script>
+
+</body>
+</html>
+
